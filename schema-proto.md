@@ -238,6 +238,94 @@
 
 ---
 
+### Social History
+
+- Social History ID
+- Patient ID
+- Smoking Status (Current, Former, Never, Unknown)
+- Smoking Pack-Years
+- Smoking Start Date
+- Smoking Quit Date
+- Alcohol Use (None, Light, Moderate, Heavy, Unknown)
+- Occupational Exposure
+- Air Pollution Exposure
+- Recorded Date
+- Recorded Doctor ID
+
+---
+
+### Family History
+
+- Family History ID
+- Patient ID
+- Relationship (Parent, Sibling, Child, Grandparent, Aunt/Uncle, Cousin, Other)
+- Side (Maternal, Paternal, Both, Unknown)
+- Cancer Type
+- Age at Diagnosis
+- Recorded Date
+
+---
+
+### Performance Status
+
+- Performance Status ID
+- Patient ID
+- Encounter ID
+- Assessment Date
+- Score Type (ECOG, Karnofsky)
+- Score Value
+- Assessing Doctor ID
+
+---
+
+### Radiation Therapy
+
+- Radiation Therapy ID
+- Encounter ID
+- Patient ID
+- Treatment Type (Definitive, Adjuvant, Palliative, Prophylactic)
+- Radiation Site / Target
+- Total Dose (Gy)
+- Number of Fractions
+- Start Date
+- End Date
+- Prescribing Doctor ID
+- Performing Technologist ID
+
+---
+
+### Adverse Event / Toxicity
+
+- Adverse Event ID
+- Encounter ID
+- Patient ID
+- Treatment ID
+- Event Term
+- CTCAE Term ID
+- Severity Grade (1-5)
+- Start Date
+- End Date
+- Outcome (Resolved, Ongoing, Fatal, Unknown)
+- Serious Adverse Event Flag (Yes/No)
+- Attribution (Unrelated, Unlikely, Possible, Probable, Definite)
+- Doctor ID
+- Reported Date
+
+---
+
+### Allergy
+
+- Allergy ID
+- Patient ID
+- Allergen
+- Allergen Type (Drug, Food, Environmental, Other)
+- Reaction Type
+- Severity (Mild, Moderate, Severe)
+- Recorded Date
+- Recorded Doctor ID
+
+---
+
 ## Relationships
 
 ```
@@ -325,6 +413,33 @@ Doctor
 Facility
 ├── has many Encounters
 └── has many Doctors
+
+Social History
+├── belongs to Patient
+└── belongs to Recorded Doctor
+
+Family History
+├── belongs to Patient
+
+Performance Status
+├── belongs to Patient
+├── belongs to Encounter
+└── belongs to Assessing Doctor
+
+Radiation Therapy
+├── belongs to Patient
+├── belongs to Encounter
+└── belongs to Prescribing Doctor
+
+Adverse Event / Toxicity
+├── belongs to Patient
+├── belongs to Encounter
+├── belongs to Treatment
+└── belongs to Doctor
+
+Allergy
+├── belongs to Patient
+└── belongs to Recorded Doctor
 ```
 
 ---
