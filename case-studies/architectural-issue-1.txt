@@ -1,0 +1,299 @@
+Many hospitals successfully install **OMOP Common Data Model** and deploy **OHDSI ATLAS**, yet **Clinical Research Coordinators (CRC)** still end up doing manual chart reviews. The reason is rarely that OMOP or ATLAS is “bad” — it’s usually an **architectural mismatch between how clinical data is produced and how research tools expect to consume it**.
+
+Below are the main architectural gaps that cause this.
+
+---
+
+# 1. OMOP Is Retrospective by Design
+
+OMOP pipelines typically run **batch ETL**.
+
+Example architecture:
+
+```
+EMR / LIS / PACS
+      │
+      │ nightly ETL
+      ▼
+OMOP Database
+      │
+      ▼
+ATLAS queries
+```
+
+The issue:
+
+* Research teams often need **near-real-time cohort identification**
+* OMOP datasets may be **days or weeks behind**
+
+Example CRC request:
+
+> “Find newly diagnosed breast cancer patients eligible for a trial.”
+
+But OMOP might only update **every night or weekly**.
+
+Result:
+
+➡ CRCs still check EMR manually.
+
+---
+
+# 2. OMOP Normalizes Data but Loses Clinical Context
+
+OMOP transforms raw hospital data into standardized tables.
+
+Example transformation:
+
+| Raw EMR             | OMOP        |
+| ------------------- | ----------- |
+| oncology note       | observation |
+| tumor staging text  | observation |
+| pathology narrative | note        |
+
+The nuance problem:
+
+Clinical eligibility criteria often depend on:
+
+* pathology wording
+* radiology interpretations
+* physician notes
+* staging context
+
+Example eligibility:
+
+```
+HER2 positive metastatic breast cancer
+after failure of trastuzumab
+```
+
+OMOP tables might contain:
+
+* diagnosis
+* drug exposure
+* lab measurement
+
+But **not the clinical reasoning** behind them.
+
+So CRCs must still open charts.
+
+---
+
+# 3. Unstructured Data Is the Majority of Clinical Data
+
+Large portions of hospital data exist as:
+
+* radiology reports
+* pathology reports
+* clinical notes
+* discharge summaries
+
+OMOP does include a `note` table, but:
+
+* it is **rarely fully populated**
+* it lacks **structured extraction**
+
+Example:
+
+```
+"Suspicious 3cm lesion in left lung"
+```
+
+Unless NLP pipelines extract this into structured fields, ATLAS cannot query it.
+
+Meaning:
+
+➡ **Manual chart review remains necessary.**
+
+---
+
+# 4. Vocabulary Mapping Gaps
+
+OMOP relies heavily on standardized vocabularies like:
+
+* SNOMED CT
+* LOINC
+* RxNorm
+
+But hospitals often have:
+
+* local lab codes
+* local procedure codes
+* custom oncology registries
+
+Example:
+
+```
+Local code: ONC_STAGE_III
+```
+
+If mapping is incomplete:
+
+ATLAS queries **miss patients**.
+
+CRC teams then distrust the system and revert to manual review.
+
+---
+
+# 5. Cohort Logic vs Clinical Reality
+
+ATLAS is good at structured queries like:
+
+```
+Age > 50
+AND Diagnosis = diabetes
+AND HbA1c > 7
+```
+
+But real trial criteria look like:
+
+```
+- Progression after 2 lines of therapy
+- No prior immunotherapy
+- ECOG performance status ≤ 1
+- Adequate liver function
+```
+
+Some of these:
+
+* are not captured in OMOP
+* are hidden in notes
+* require clinical interpretation
+
+So even when ATLAS finds candidates:
+
+➡ CRCs must **verify manually**.
+
+---
+
+# 6. Governance and Data Access Constraints
+
+Many hospitals intentionally restrict OMOP datasets.
+
+Typical setup:
+
+```
+ATLAS → cohort counts only
+```
+
+Researchers may see:
+
+```
+Cohort size = 87
+```
+
+But not the patient identifiers.
+
+CRC workflow then becomes:
+
+```
+1. ATLAS identifies cohort
+2. CRC requests patient list
+3. Data team extracts manually
+4. CRC verifies in EMR
+```
+
+Which recreates **manual bottlenecks**.
+
+---
+
+# 7. Missing Operational Workflows
+
+OMOP + ATLAS focus on **research analytics**, not **clinical trial operations**.
+
+CRC teams also need:
+
+* patient contact tracking
+* screening logs
+* eligibility workflows
+* recruitment monitoring
+
+These functions belong to systems like:
+
+* REDCap
+* OpenClinica
+
+So even with ATLAS:
+
+CRC work still happens elsewhere.
+
+---
+
+# 8. The Real Architecture That Works Better
+
+Successful research platforms add layers **on top of OMOP**.
+
+Example architecture:
+
+```
+Hospital Systems
+(EMR / LIS / PACS)
+        │
+        ▼
+ETL Pipeline
+        │
+        ▼
+OMOP CDM
+        │
+        ├── ATLAS (research cohort design)
+        │
+        ├── NLP pipelines
+        │
+        ├── real-time event streams
+        │
+        └── trial matching engines
+```
+
+Some institutions add:
+
+* real-time eligibility alerts
+* automated cohort refresh
+* AI-assisted chart review
+
+---
+
+# 9. Why This Matters for Your CRC Pain Points
+
+Your earlier pain points included:
+
+* manual chart reviews
+* slow cohort identification
+* reliance on clinician knowledge
+* difficulty reproducing studies
+
+Those are exactly the symptoms when:
+
+```
+OMOP exists
+BUT
+research workflows were never redesigned
+```
+
+The architecture solved **data standardization**, but not **clinical operations**.
+
+---
+
+💡 **The key architectural insight**
+
+Most CRD projects assume:
+
+```
+Install OMOP + ATLAS
+→ research becomes automated
+```
+
+But in reality:
+
+```
+EMR complexity
++ unstructured clinical data
++ eligibility nuance
+= manual CRC work remains
+```
+
+---
+
+If you want, I can also show you something **very useful for designing CRD systems**:
+
+**The 4 architectural layers modern hospitals use for research platforms (the ones that actually eliminate manual chart review).**
+
+It explains why some institutions can identify trial patients **in minutes instead of weeks**.
